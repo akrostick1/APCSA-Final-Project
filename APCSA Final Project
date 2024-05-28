@@ -133,7 +133,7 @@ class Player
         {
             updateValue = pointFactor;
         }
-        updateValue *= 0.01;
+        updateValue *= 0.05;
         rating += updateValue;
         if (rating > 10.0)
         {
