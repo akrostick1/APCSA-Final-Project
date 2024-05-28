@@ -1,4 +1,3 @@
-import java.lang.Math;
 import java.util.Scanner;
 import java.util.*;
 
@@ -25,6 +24,31 @@ class Match
         winner = win;
     }
     
+    public int getWinningScore()
+    {
+        return winningScore;
+    }
+    
+    public int getLosingScore()
+    {
+        return losingScore;
+    }
+    
+    public Player getPlayer1()
+    {
+        return player1;
+    }
+    
+    public Player getPlayer2()
+    {
+        return player2;
+    }
+    
+    public Player getWinner()
+    {
+        return winner;
+    }
+    
     public String displayMatch()
     {
         return "\n" + player1.getName() + " vs. " + player2.getName() + "\nScore: " + winningScore + "-" + losingScore + "\nWinner: " + winner.getName() + "\nDate: " + month + "-" + year + "\n";
@@ -44,14 +68,9 @@ class Player
         matchHistory = new ArrayList<Match>();
     }
     
-    public void addMatch (Match m)
+    public void addMatch(Match m)
     {
         matchHistory.add(m);
-    }
-    
-    public void updateRating()
-    {
-        rating++;
     }
     
     public String displayMatchHistory()
@@ -66,6 +85,69 @@ class Player
             return output;
         }
         return "\nYou have not played any matches yet.\n";
+    }
+    
+    public void updateRating()
+    {
+        double pointFactor = 0.0;
+        double rateFactor = 0.0;
+        boolean won = this.equals(matchHistory.get(matchHistory.size() - 1).getWinner());
+        if (won)
+        {
+            pointFactor = matchHistory.get(matchHistory.size() - 1).getWinningScore() - matchHistory.get(matchHistory.size() - 1).getLosingScore();
+        }
+        else
+        {
+            pointFactor = matchHistory.get(matchHistory.size() - 1).getLosingScore() - matchHistory.get(matchHistory.size() - 1).getWinningScore();
+        }
+        if (this.equals(matchHistory.get(matchHistory.size() - 1).getPlayer1()))
+        {
+            rateFactor = matchHistory.get(matchHistory.size() - 1).getPlayer2().getRating() - rating;
+        }
+        else 
+        {
+            rateFactor = matchHistory.get(matchHistory.size() - 1).getPlayer1().getRating() - rating;
+        }
+        if (won)
+        {
+            pointFactor -= 1.0;
+        }
+        else
+        {
+            pointFactor += 1.0;
+        }
+        if ((won && rateFactor < 0.0) || (!won && rateFactor > 0.0))
+        {
+            rateFactor = 1;
+        }
+        if (rateFactor < 1.0)
+        {
+            rateFactor = 1.0;
+        }
+        double updateValue = 0.0;
+        if (rateFactor != 0.0)
+        {
+            updateValue = pointFactor * rateFactor;
+        }
+        else
+        {
+            updateValue = pointFactor;
+        }
+        updateValue *= 0.01;
+        rating += updateValue;
+        if (rating > 10.0)
+        {
+            rating = 10.0;
+        }
+        if (rating < 0.0)
+        {
+            rating = 0.0;
+        }
+    }
+    
+    public void setRating(double r)
+    {
+        rating = r;
     }
     
     public String getName()
@@ -93,11 +175,21 @@ class League
         playerList = new ArrayList<Player>();
     }
     
+    public League(ArrayList<Player> pl)
+    {
+        playerList = new ArrayList<Player>();
+        for (int x = 0; x < pl.size(); x++)
+        {
+            this.addPlayer(pl.get(x));
+        }
+    }
+    
     public void addPlayer(Player p)
     {
         playerList.add(p);
         for (int j = 1; j < playerList.size(); j++)
         {
+            Player currentPlayer = playerList.get(j);
             double currentElement = playerList.get(j).getRating();
             int possibleIndex = j;
             while (possibleIndex > 0 && currentElement < playerList.get(possibleIndex - 1).getRating())
@@ -105,7 +197,7 @@ class League
                     playerList.set(possibleIndex, playerList.get(possibleIndex - 1));
                     possibleIndex--;
                 }
-            currentElement = playerList.get(possibleIndex).getRating();
+            playerList.set(possibleIndex, currentPlayer);
         }
     }
     
@@ -135,33 +227,33 @@ class League
     
     public String topTenPlayers()
     {
-        if (playerList.size() > 10)
+        if (playerList.size() >= 10)
         {
-            return "Top 10 Players in the World\n" + 
-            playerList.get(playerList.size() - 10).getName() + " - " + 
-            playerList.get(playerList.size() - 10).getRating() + "\n" + 
-            playerList.get(playerList.size() - 9).getName() + " - " + 
-            playerList.get(playerList.size() - 9).getRating() + "\n" + 
-            playerList.get(playerList.size() - 8).getName() + " - " + 
-            playerList.get(playerList.size() - 8).getRating() + "\n" + 
-            playerList.get(playerList.size() - 7).getName() + " - " + 
-            playerList.get(playerList.size() - 7).getRating() + "\n" + 
-            playerList.get(playerList.size() - 6).getName() + " - " + 
-            playerList.get(playerList.size() - 6).getRating() + "\n" + 
-            playerList.get(playerList.size() - 5).getName() + " - " + 
-            playerList.get(playerList.size() - 5).getRating() + "\n" + 
-            playerList.get(playerList.size() - 4).getName() + " - " + 
-            playerList.get(playerList.size() - 4).getRating() + "\n" + 
-            playerList.get(playerList.size() - 3).getName() + " - " + 
-            playerList.get(playerList.size() - 3).getRating() + "\n" + 
+            return "\nTop 10 Players in the World\n" + 
+            playerList.get(playerList.size() - 1).getName() + " - " + 
+            playerList.get(playerList.size() - 1).getRating() + "\n" + 
             playerList.get(playerList.size() - 2).getName() + " - " + 
             playerList.get(playerList.size() - 2).getRating() + "\n" + 
-            playerList.get(playerList.size() - 1).getName() + " - " + 
-            playerList.get(playerList.size() - 1).getRating();
+            playerList.get(playerList.size() - 3).getName() + " - " + 
+            playerList.get(playerList.size() - 3).getRating() + "\n" + 
+            playerList.get(playerList.size() - 4).getName() + " - " + 
+            playerList.get(playerList.size() - 4).getRating() + "\n" + 
+            playerList.get(playerList.size() - 5).getName() + " - " + 
+            playerList.get(playerList.size() - 5).getRating() + "\n" + 
+            playerList.get(playerList.size() - 6).getName() + " - " + 
+            playerList.get(playerList.size() - 6).getRating() + "\n" + 
+            playerList.get(playerList.size() - 7).getName() + " - " + 
+            playerList.get(playerList.size() - 7).getRating() + "\n" + 
+            playerList.get(playerList.size() - 8).getName() + " - " + 
+            playerList.get(playerList.size() - 8).getRating() + "\n" + 
+            playerList.get(playerList.size() - 9).getName() + " - " + 
+            playerList.get(playerList.size() - 9).getRating() + "\n" + 
+            playerList.get(playerList.size() - 10).getName() + " - " + 
+            playerList.get(playerList.size() - 10).getRating() + "\n";
         }
         else
         {
-            return "The league does not have enough players to display the top ten.";
+            return "\nThe league does not have enough players to display the top ten.\n";
         }
     }
 }
@@ -171,7 +263,33 @@ public class Main
     public static void main(String[] args) 
     {
         Scanner scan = new Scanner(System.in);
-        League pickleballLeague = new League();
+        Player sp1 = new Player("John White");
+        Player sp2 = new Player("Lucy Smith");
+        Player sp3 = new Player("Jameel Reyal");
+        Player sp4 = new Player("Colton Johnson");
+        Player sp5 = new Player("Lee Puxton");
+        Player sp6 = new Player("Dana Ramilov");
+        Player sp7 = new Player("Jon Jansen");
+        Player sp8 = new Player("Max Baptiste");
+        Player sp9 = new Player("Kelly Sanders");
+        Player sp10 = new Player("Scott Carrington");
+        ArrayList<Player> startingPlayers = new ArrayList<Player>();
+        startingPlayers.add(sp1);
+        startingPlayers.add(sp2);
+        startingPlayers.add(sp3);
+        startingPlayers.add(sp4);
+        startingPlayers.add(sp5);
+        startingPlayers.add(sp6);
+        startingPlayers.add(sp7);
+        startingPlayers.add(sp8);
+        startingPlayers.add(sp9);
+        startingPlayers.add(sp10);
+        for (int p = 0; p < startingPlayers.size(); p++)
+        {
+            double rt = (double)((int) (Math.random() * 10.0));
+            startingPlayers.get(p).setRating(rt);
+        }
+        League pickleballLeague = new League(startingPlayers);
         System.out.println("Hello! Welcome to Universal Pickleball Rating, the ultimate rating system for pickleball players around the world!\n");
         displayMainMenu();
         String option = scan.nextLine();
@@ -194,35 +312,43 @@ public class Main
                         }
                         else if (option2.equals("m"))
                         {
-                            System.out.println("Your match only counts toward your rating if it was against a registered player.\n");
-                            String p1Name = playerName;
-                            System.out.println("What was your opponents name?");
+                            System.out.println("Your match only counts toward your rating if it was against a registered player.\nWhat was your opponents name?");
                             String p2Name = scan.nextLine();
-                            System.out.println("What was the winner's score?");
-                            int winScore = scan.nextInt();
-                            System.out.println("What was the loser's score?");
-                            int loseScore = scan.nextInt();
-                            System.out.println("In what year was the match played?");
-                            int yr = scan.nextInt();
-                            System.out.println("In what month was the match played? (number 1-12)");
-                            int mnth = scan.nextInt();
-                            System.out.println("What is the name of the player that won?");
-                            String a = scan.nextLine();
-                            String winName = scan.nextLine();
-                            Match m = new Match(winScore, loseScore, mnth, yr, pickleballLeague.getPlayer(p1Name), pickleballLeague.getPlayer(p2Name), pickleballLeague.getPlayer(winName));
-                            System.out.println("Match added!");
+                            if (pickleballLeague.isARegisteredPlayer(p2Name))
+                            {
+                                System.out.println("What was the winner's score? This needs to be 11 unless the players tied at 10 and had to do win by two. In that case, this can only be two points higher than the losing score.");
+                                int winScore = scan.nextInt();
+                                System.out.println("What was the loser's score? This needs to be between 0-9 unless the players tied at 10 and had to do win by two. In that case, this can only be two points lower than the winning score.");
+                                int loseScore = scan.nextInt();
+                                System.out.println("In what year was the match played?");
+                                int yr = scan.nextInt();
+                                System.out.println("In what month was the match played? (number 1-12)");
+                                int mnth = scan.nextInt();
+                                System.out.println("What is the name of the player that won?");
+                                String a = scan.nextLine();
+                                String winName = scan.nextLine();
+                                Match m = new Match(winScore, loseScore, mnth, yr, pickleballLeague.getPlayer(playerName), pickleballLeague.getPlayer(p2Name), pickleballLeague.getPlayer(winName));
+                                pickleballLeague.getPlayer(playerName).updateRating();
+                                pickleballLeague.getPlayer(p2Name).updateRating();
+                                System.out.println("Your match has been added and your rating has been updated.\n");
+                            }
+                            else
+                            {
+                                System.out.println("Your opponent is not a registered player. Please only add matches against registered players.\n");
+                            }
                         }
                         else
                         {
                             System.out.println("Invalid input! Please type an option from the profile menu:\n");
                         }
+                        System.out.println(pickleballLeague.getPlayer(playerName).toString());
                         displayProfileMenu();
                         option2 = scan.nextLine();
                     }
                 }
                 else
                 {
-                    System.out.println("You are not a registered player. Please select \"n\" to create a profile.");
+                    System.out.println("You are not a registered player. Please select \"n\" to create a profile.\n");
                 }
             }
             else if (option.equals("n"))
